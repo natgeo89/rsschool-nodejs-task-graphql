@@ -2,7 +2,7 @@ import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'g
 import { UUIDType } from './types/uuid.js';
 import { GQLField } from './types/general.js';
 
-export const Post = new GraphQLObjectType({
+export const PostType = new GraphQLObjectType({
   name: 'Post',
   fields: {
     id: {
@@ -17,15 +17,15 @@ export const Post = new GraphQLObjectType({
   },
 });
 
-export const postsField: GQLField = {
-  type: new GraphQLList(Post),
+export const POSTS: GQLField = {
+  type: new GraphQLList(PostType),
   resolve: async (_source, _args, { prisma }) => {
     return prisma.post.findMany();
   },
 };
 
-export const postField: GQLField = {
-  type: Post,
+export const POST: GQLField = {
+  type: PostType,
   args: {
     id: {
       type: new GraphQLNonNull(UUIDType),

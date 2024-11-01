@@ -6,11 +6,14 @@ import {
   GraphQLString,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
-import { Profile } from './profiles.js';
-import { Post } from './posts.js';
-import { GQLField } from './types/general.js';
+import { ProfileType } from './profiles.js';
+import { PostType } from './posts.js';
+import { GQLContext, GQLField } from './types/general.js';
 
-export const User: GraphQLObjectType = new GraphQLObjectType({
+export const UserType: GraphQLObjectType = new GraphQLObjectType<
+  { id: string },
+  GQLContext
+>({
   name: 'User',
   fields: () => ({
     id: {
@@ -23,39 +26,59 @@ export const User: GraphQLObjectType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLFloat),
     },
     profile: {
-      type: Profile,
+      type: ProfileType,
+      resolve: async (source, _args, { prisma }) => {
+        const profile = await prisma.profile.findUnique({
+          where: {
+            userId: source.id,
+          },
+        });
+
+        return profile;
+      },
     },
     posts: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
+      resolve: async (source, _args, { prisma }) => {
+        const posts = await prisma.post.findMany({
+          where: {
+            authorId: source.id,
+          },
+        });
+
+        return posts;
+      },
     },
     userSubscribedTo: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
     },
     subscribedToUser: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
     },
   }),
 });
 
-export const usersField: GQLField = {
-  type: new GraphQLList(User),
+export const USERS: GQLField = {
+  type: new GraphQLList(UserType),
   resolve: async (_source, _args, { prisma }) => {
     return prisma.user.findMany();
   },
 };
 
-export const userField: GQLField = {
-  type: User,
+export const USER: GQLField = {
+  type: UserType,
   args: {
     id: {
       type: new GraphQLNonNull(UUIDType),
     },
   },
   resolve: async (_source, args, { prisma }) => {
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         id: args.id,
       },
     });
+
+    return user;
   },
 };

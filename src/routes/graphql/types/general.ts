@@ -5,8 +5,8 @@ export interface GQLContext {
   prisma: PrismaClient;
 }
 
-export type GQLField<ArgsType = { id: string }> = GraphQLFieldConfig<
-  unknown,
+export type GQLField<SourceType = unknown, ArgsType = { id: string }> = GraphQLFieldConfig<
+  SourceType,
   GQLContext,
   ArgsType
 >;
