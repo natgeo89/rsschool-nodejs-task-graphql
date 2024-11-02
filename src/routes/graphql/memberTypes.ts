@@ -1,7 +1,7 @@
 import { GraphQLEnumType, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType } from "graphql";
 import { GQLField } from "./types/general.js";
 
-const MemberTypeId = new GraphQLEnumType({
+export const MemberTypeId = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
     BASIC: {

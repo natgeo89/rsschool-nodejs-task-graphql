@@ -1,10 +1,17 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import { graphql, GraphQLObjectType, GraphQLSchema, parse, validate } from 'graphql';
+import {
+  graphql,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+  parse,
+  validate,
+} from 'graphql';
 import { memberTypeField, memberTypesField } from './memberTypes.js';
-import { POST, POSTS } from './posts.js';
-import { PROFILE, PROFILES } from './profiles.js';
-import { USER, USERS } from './users.js';
+import { CREATE_POST, DELETE_POST, POST, POSTS } from './posts.js';
+import { CREATE_PROFILE, PROFILE, PROFILES } from './profiles.js';
+import { CREATE_USER, USER, USERS } from './users.js';
 import { GQLContext } from './types/general.js';
 import depthLimit from 'graphql-depth-limit';
 
@@ -23,6 +30,31 @@ const schema = new GraphQLSchema({
 
       profiles: PROFILES,
       profile: PROFILE,
+    },
+  }),
+
+  // type Mutations {
+  //   createUser(dto: CreateUserInput!): User!
+  //   createProfile(dto: CreateProfileInput!): Profile!
+  //   createPost(dto: CreatePostInput!): Post!
+  //   changePost(id: UUID!, dto: ChangePostInput!): Post!
+  //   changeProfile(id: UUID!, dto: ChangeProfileInput!): Profile!
+  //   changeUser(id: UUID!, dto: ChangeUserInput!): User!
+  //   deleteUser(id: UUID!): String!
+  //   deletePost(id: UUID!): String!
+  //   deleteProfile(id: UUID!): String!
+  //   subscribeTo(userId: UUID!, authorId: UUID!): String!
+  //   unsubscribeFrom(userId: UUID!, authorId: UUID!): String!
+  // }
+
+  mutation: new GraphQLObjectType<unknown, GQLContext>({
+    name: 'Mutations',
+    fields: {
+      createUser: CREATE_USER,
+      createPost: CREATE_POST,
+      createProfile: CREATE_PROFILE,
+
+      deletePost: DELETE_POST,
     },
   }),
 });

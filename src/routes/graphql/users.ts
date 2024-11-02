@@ -1,5 +1,6 @@
 import {
   GraphQLFloat,
+  GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
@@ -9,6 +10,7 @@ import { UUIDType } from './types/uuid.js';
 import { ProfileType } from './profiles.js';
 import { PostType } from './posts.js';
 import { GQLContext, GQLField } from './types/general.js';
+import { Prisma } from '@prisma/client';
 
 export const UserType: GraphQLObjectType = new GraphQLObjectType<
   { id: string },
@@ -106,5 +108,38 @@ export const USER: GQLField = {
     });
 
     return user;
+  },
+};
+
+// input CreateUserInput {
+//   name: String!
+//   balance: Float!
+// }
+
+export const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: {
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    balance: {
+      type: new GraphQLNonNull(GraphQLFloat),
+    },
+  },
+});
+
+export const CREATE_USER: GQLField<unknown, { dto: Prisma.UserCreateInput }> = {
+  type: UserType,
+  args: {
+    dto: {
+      type: new GraphQLNonNull(CreateUserInput),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+    const newUser = await prisma.user.create({
+      data: args.dto,
+    });
+
+    return newUser;
   },
 };

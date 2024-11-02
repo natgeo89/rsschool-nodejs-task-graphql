@@ -1,13 +1,16 @@
 import {
   GraphQLBoolean,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
-import { MemberType } from './memberTypes.js';
+import { MemberType, MemberTypeId } from './memberTypes.js';
 import { GQLContext, GQLField } from './types/general.js';
+import { Prisma } from '@prisma/client';
+
 
 export const ProfileType = new GraphQLObjectType<{ memberTypeId: string }, GQLContext>({
   name: 'Profile',
@@ -56,5 +59,39 @@ export const PROFILE: GQLField = {
         id: args.id,
       },
     });
+  },
+};
+
+export const CreateProfileInput = new GraphQLInputObjectType({
+  name: 'CreateProfileInput',
+  fields: {
+    isMale: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    yearOfBirth: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    userId: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+    memberTypeId: {
+      type: new GraphQLNonNull(MemberTypeId),
+    },
+  },
+});
+
+export const CREATE_PROFILE: GQLField<unknown, {dto: Prisma.ProfileCreateInput}> = {
+  type: ProfileType,
+  args: {
+    dto: {
+      type: new GraphQLNonNull(CreateProfileInput),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+    const newProfile = await prisma.profile.create({
+      data: args.dto,
+    });
+
+    return newProfile;
   },
 };
