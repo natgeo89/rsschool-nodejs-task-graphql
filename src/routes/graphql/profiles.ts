@@ -5,12 +5,12 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLString,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import { MemberType, MemberTypeId } from './memberTypes.js';
 import { GQLContext, GQLField } from './types/general.js';
 import { Prisma } from '@prisma/client';
-
 
 export const ProfileType = new GraphQLObjectType<{ memberTypeId: string }, GQLContext>({
   name: 'Profile',
@@ -80,7 +80,7 @@ export const CreateProfileInput = new GraphQLInputObjectType({
   },
 });
 
-export const CREATE_PROFILE: GQLField<unknown, {dto: Prisma.ProfileCreateInput}> = {
+export const CREATE_PROFILE: GQLField<unknown, { dto: Prisma.ProfileCreateInput }> = {
   type: ProfileType,
   args: {
     dto: {
@@ -93,5 +93,23 @@ export const CREATE_PROFILE: GQLField<unknown, {dto: Prisma.ProfileCreateInput}>
     });
 
     return newProfile;
+  },
+};
+
+export const DELETE_PROFILE: GQLField = {
+  type: new GraphQLNonNull(GraphQLString),
+  args: {
+    id: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+    await prisma.profile.delete({
+      where: {
+        id: args.id,
+      },
+    });
+
+    return 'deletedProfile';
   },
 };

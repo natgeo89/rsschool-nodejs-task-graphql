@@ -111,11 +111,6 @@ export const USER: GQLField = {
   },
 };
 
-// input CreateUserInput {
-//   name: String!
-//   balance: Float!
-// }
-
 export const CreateUserInput = new GraphQLInputObjectType({
   name: 'CreateUserInput',
   fields: {
@@ -141,5 +136,23 @@ export const CREATE_USER: GQLField<unknown, { dto: Prisma.UserCreateInput }> = {
     });
 
     return newUser;
+  },
+};
+
+export const DELETE_USER: GQLField = {
+  type: new GraphQLNonNull(GraphQLString),
+  args: {
+    id: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+    await prisma.user.delete({
+      where: {
+        id: args.id,
+      },
+    });
+
+    return 'deletedUser';
   },
 };

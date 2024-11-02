@@ -62,7 +62,7 @@ export const CreatePostInput = new GraphQLInputObjectType({
   },
 });
 
-export const CREATE_POST: GQLField<unknown, {dto: Prisma.PostCreateInput}> = {
+export const CREATE_POST: GQLField<unknown, { dto: Prisma.PostCreateInput }> = {
   type: PostType,
   args: {
     dto: {
@@ -78,20 +78,20 @@ export const CREATE_POST: GQLField<unknown, {dto: Prisma.PostCreateInput}> = {
   },
 };
 
-export const DELETE_POST: GQLField<unknown, {aaa: string}> = {
-  type: new GraphQLNonNull(PostType),
+export const DELETE_POST: GQLField = {
+  type: new GraphQLNonNull(GraphQLString),
   args: {
-    aaa: {
+    id: {
       type: new GraphQLNonNull(UUIDType),
     },
   },
   resolve: async (_source, args, { prisma }) => {
-    const deletedPost = await prisma.post.delete({
+    await prisma.post.delete({
       where: {
-        id: args.aaa,
+        id: args.id,
       },
     });
 
-    return deletedPost;
+    return 'deletedPost';
   },
 };
