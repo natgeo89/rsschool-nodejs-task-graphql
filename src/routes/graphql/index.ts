@@ -8,9 +8,9 @@ import {
   validate,
 } from 'graphql';
 import { memberTypeField, memberTypesField } from './memberTypes.js';
-import { CREATE_POST, DELETE_POST, POST, POSTS } from './posts.js';
-import { CREATE_PROFILE, DELETE_PROFILE, PROFILE, PROFILES } from './profiles.js';
-import { CREATE_USER, DELETE_USER, USER, USERS } from './users.js';
+import { CHANGE_POST, CREATE_POST, DELETE_POST, POST, POSTS } from './posts.js';
+import { CHANGE_PROFILE, CREATE_PROFILE, DELETE_PROFILE, PROFILE, PROFILES } from './profiles.js';
+import { CHANGE_USER, CREATE_USER, DELETE_USER, USER, USERS } from './users.js';
 import { GQLContext } from './types/general.js';
 import depthLimit from 'graphql-depth-limit';
 
@@ -56,6 +56,11 @@ const schema = new GraphQLSchema({
       deletePost: DELETE_POST,
       deleteProfile: DELETE_PROFILE,
       deleteUser: DELETE_USER,
+
+
+      changePost: CHANGE_POST,
+      changeProfile: CHANGE_PROFILE,
+      changeUser: CHANGE_USER,
     },
   }),
 });

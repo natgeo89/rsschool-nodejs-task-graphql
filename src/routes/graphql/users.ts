@@ -156,3 +156,35 @@ export const DELETE_USER: GQLField = {
     return 'deletedUser';
   },
 };
+
+export const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: {
+    name: {
+      type: GraphQLString,
+    },
+    balance: {
+      type: GraphQLFloat,
+    },
+  },
+});
+
+export const CHANGE_USER: GQLField<unknown, { id: string; dto: Prisma.UserUpdateInput }> = {
+  type: new GraphQLNonNull(UserType),
+  args: {
+    id: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+    dto: {
+      type: new GraphQLNonNull(ChangeUserInput),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+    const updatedUser = await prisma.user.update({
+      where: { id: args.id},
+      data: args.dto,
+    });
+
+    return updatedUser;
+  },
+};

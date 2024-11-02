@@ -113,3 +113,39 @@ export const DELETE_PROFILE: GQLField = {
     return 'deletedProfile';
   },
 };
+
+export const ChangeProfileInput = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: {
+      type: GraphQLBoolean,
+    },
+    yearOfBirth: {
+      type: GraphQLInt,
+    },
+    memberTypeId: {
+      type: MemberTypeId,
+    },
+  },
+});
+
+export const CHANGE_PROFILE: GQLField<unknown, { id: string; dto: Prisma.ProfileUpdateInput }> =
+  {
+    type: new GraphQLNonNull(ProfileType),
+    args: {
+      id: {
+        type: new GraphQLNonNull(UUIDType),
+      },
+      dto: {
+        type: new GraphQLNonNull(ChangeProfileInput),
+      },
+    },
+    resolve: async (_source, args, { prisma }) => {
+      const updatedProfile = await prisma.profile.update({
+        where: { id: args.id },
+        data: args.dto,
+      });
+
+      return updatedProfile;
+    },
+  };

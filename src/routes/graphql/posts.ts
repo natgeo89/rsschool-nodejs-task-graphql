@@ -95,3 +95,35 @@ export const DELETE_POST: GQLField = {
     return 'deletedPost';
   },
 };
+
+export const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: {
+    title: {
+      type: GraphQLString,
+    },
+    content: {
+      type: GraphQLString,
+    },
+  },
+});
+
+export const CHANGE_POST: GQLField<unknown, { id: string; dto: Prisma.PostUpdateInput }> = {
+  type: new GraphQLNonNull(PostType),
+  args: {
+    id: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+    dto: {
+      type: new GraphQLNonNull(ChangePostInput),
+    }
+  },
+  resolve: async (_source, args, { prisma }) => {
+    const updatedPost = await prisma.post.update({
+      where: { id: args.id },
+      data: args.dto,
+    })
+
+    return updatedPost;
+  },
+};
