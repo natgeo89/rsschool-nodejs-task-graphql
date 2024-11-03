@@ -188,3 +188,49 @@ export const CHANGE_USER: GQLField<unknown, { id: string; dto: Prisma.UserUpdate
     return updatedUser;
   },
 };
+
+export const USER_SUBSCRIBE_TO_AUTHOR: GQLField<unknown, { userId: string; authorId: string }> = {
+  type: new GraphQLNonNull(GraphQLString),
+  args: {
+    userId: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+    authorId: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+     await prisma.subscribersOnAuthors.create({
+      data: {
+        subscriberId: args.userId,
+        authorId: args.authorId,
+      },
+    });
+
+    return 'user subscribed to author';
+  },
+};
+
+export const USER_UNSUBSCRIBE_FROM_AUTHOR: GQLField<unknown, { userId: string; authorId: string }> = {
+  type: new GraphQLNonNull(GraphQLString),
+  args: {
+    userId: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+    authorId: {
+      type: new GraphQLNonNull(UUIDType),
+    },
+  },
+  resolve: async (_source, args, { prisma }) => {
+     await prisma.subscribersOnAuthors.delete({
+      where: {
+        subscriberId_authorId: {
+          subscriberId: args.userId,
+          authorId: args.authorId,
+        },
+      },
+    });
+
+    return 'user subscribed to author';
+  },
+};

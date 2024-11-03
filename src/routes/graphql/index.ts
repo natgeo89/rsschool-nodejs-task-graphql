@@ -1,16 +1,24 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import {
-  graphql,
-  GraphQLObjectType,
-  GraphQLSchema,
-  parse,
-  validate,
-} from 'graphql';
-import { memberTypeField, memberTypesField } from './memberTypes.js';
+import { graphql, GraphQLObjectType, GraphQLSchema, parse, validate } from 'graphql';
+import { MEMBER_TYPE, MEMBER_TYPES } from './memberTypes.js';
 import { CHANGE_POST, CREATE_POST, DELETE_POST, POST, POSTS } from './posts.js';
-import { CHANGE_PROFILE, CREATE_PROFILE, DELETE_PROFILE, PROFILE, PROFILES } from './profiles.js';
-import { CHANGE_USER, CREATE_USER, DELETE_USER, USER, USERS } from './users.js';
+import {
+  CHANGE_PROFILE,
+  CREATE_PROFILE,
+  DELETE_PROFILE,
+  PROFILE,
+  PROFILES,
+} from './profiles.js';
+import {
+  CHANGE_USER,
+  CREATE_USER,
+  DELETE_USER,
+  USER,
+  USER_SUBSCRIBE_TO_AUTHOR,
+  USER_UNSUBSCRIBE_FROM_AUTHOR,
+  USERS,
+} from './users.js';
 import { GQLContext } from './types/general.js';
 import depthLimit from 'graphql-depth-limit';
 
@@ -18,8 +26,8 @@ const schema = new GraphQLSchema({
   query: new GraphQLObjectType<unknown, GQLContext>({
     name: 'RootQueryType',
     fields: {
-      memberTypes: memberTypesField,
-      memberType: memberTypeField,
+      memberTypes: MEMBER_TYPES,
+      memberType: MEMBER_TYPE,
 
       posts: POSTS,
       post: POST,
@@ -32,20 +40,6 @@ const schema = new GraphQLSchema({
     },
   }),
 
-  // type Mutations {
-  //   createUser(dto: CreateUserInput!): User!
-  //   createProfile(dto: CreateProfileInput!): Profile!
-  //   createPost(dto: CreatePostInput!): Post!
-  //   changePost(id: UUID!, dto: ChangePostInput!): Post!
-  //   changeProfile(id: UUID!, dto: ChangeProfileInput!): Profile!
-  //   changeUser(id: UUID!, dto: ChangeUserInput!): User!
-  //   deleteUser(id: UUID!): String!
-  //   deletePost(id: UUID!): String!
-  //   deleteProfile(id: UUID!): String!
-  //   subscribeTo(userId: UUID!, authorId: UUID!): String!
-  //   unsubscribeFrom(userId: UUID!, authorId: UUID!): String!
-  // }
-
   mutation: new GraphQLObjectType<unknown, GQLContext>({
     name: 'Mutations',
     fields: {
@@ -57,10 +51,12 @@ const schema = new GraphQLSchema({
       deleteProfile: DELETE_PROFILE,
       deleteUser: DELETE_USER,
 
-
       changePost: CHANGE_POST,
       changeProfile: CHANGE_PROFILE,
       changeUser: CHANGE_USER,
+
+      subscribeTo: USER_SUBSCRIBE_TO_AUTHOR,
+      unsubscribeFrom: USER_UNSUBSCRIBE_FROM_AUTHOR,
     },
   }),
 });

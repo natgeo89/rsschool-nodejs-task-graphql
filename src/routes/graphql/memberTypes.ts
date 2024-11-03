@@ -1,5 +1,12 @@
-import { GraphQLEnumType, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType } from "graphql";
-import { GQLField } from "./types/general.js";
+import {
+  GraphQLEnumType,
+  GraphQLFloat,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+} from 'graphql';
+import { GQLField } from './types/general.js';
 
 export const MemberTypeId = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -28,14 +35,14 @@ export const MemberType = new GraphQLObjectType({
   },
 });
 
-export const memberTypesField: GQLField = {
+export const MEMBER_TYPES: GQLField = {
   type: new GraphQLList(MemberType),
   resolve: async (_source, _args, { prisma }) => {
     return prisma.memberType.findMany();
   },
 };
 
-export const memberTypeField: GQLField = {
+export const MEMBER_TYPE: GQLField = {
   type: MemberType,
   args: {
     id: {
@@ -47,6 +54,6 @@ export const memberTypeField: GQLField = {
       where: {
         id: args.id,
       },
-    })
+    });
   },
 };
