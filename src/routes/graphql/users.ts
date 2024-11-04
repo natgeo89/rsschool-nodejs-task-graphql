@@ -29,58 +29,34 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType<
     },
     profile: {
       type: ProfileType,
-      resolve: async (source, _args, { prisma }) => {
-        const profile = await prisma.profile.findUnique({
-          where: {
-            userId: source.id,
-          },
-        });
+      resolve: async (source, _args, { dataLoader }) => {
+        const userPosts = await dataLoader.profile.load(source.id)
 
-        return profile;
+        return userPosts;
       },
     },
     posts: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
-      resolve: async (source, _args, { prisma }) => {
-        const posts = await prisma.post.findMany({
-          where: {
-            authorId: source.id,
-          },
-        });
+      resolve: async (source, _args, { dataLoader }) => {
+        const userPosts = await dataLoader.posts.load(source.id)
 
-        return posts;
+        return userPosts;
       },
     },
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
-      resolve: async (source, _args, { prisma }) => {
-        const users = await prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: source.id,
-              },
-            },
-          },
-        });
+      resolve: async (source, _args, { dataLoader }) => {
+        const userSubscribedTo = await dataLoader.userSubscribedTo.load(source.id)
 
-        return users;
+        return userSubscribedTo;
       },
     },
     subscribedToUser: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
-      resolve: async (source, _args, { prisma }) => {
-        const users = await prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: source.id,
-              },
-            },
-          },
-        });
+      resolve: async (source, _args, { dataLoader }) => {
+        const subscribedToUser = await dataLoader.subscribedToUser.load(source.id)
 
-        return users;
+        return subscribedToUser;
       },
     },
   }),

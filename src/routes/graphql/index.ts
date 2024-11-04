@@ -19,8 +19,15 @@ import {
   USER_UNSUBSCRIBE_FROM_AUTHOR,
   USERS,
 } from './users.js';
-import { GQLContext } from './types/general.js';
+import {
+  GQLContext,
+  MemberType,
+  PostType,
+  ProfileType,
+  UserType,
+} from './types/general.js';
 import depthLimit from 'graphql-depth-limit';
+import DataLoader from 'dataloader';
 
 const schema = new GraphQLSchema({
   query: new GraphQLObjectType<unknown, GQLContext>({
@@ -81,12 +88,122 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         return { errors: validationErrors };
       }
 
+      const userSubscribedToLoader = new DataLoader<string, UserType[]>(
+        async (usersIds: readonly string[]) => {
+          const authors = await prisma.user.findMany({
+            where: {
+              subscribedToUser: {
+                some: {
+                  subscriberId: {
+                    in: [...usersIds],
+                  },
+                },
+              },
+            },
+            include: {
+              subscribedToUser: true,
+            },
+          });
+
+          return usersIds.map((userId) => {
+            return authors.filter((author) => {
+              return author.subscribedToUser.find(
+                ({ subscriberId }) => subscriberId === userId,
+              );
+            });
+          });
+        },
+      );
+
+      const subscribedToUserLoader = new DataLoader<string, UserType[]>(
+        async (usersIds: readonly string[]) => {
+          const subscribers = await prisma.user.findMany({
+            where: {
+              userSubscribedTo: {
+                some: {
+                  authorId: {
+                    in: [...usersIds],
+                  },
+                },
+              },
+            },
+            include: {
+              userSubscribedTo: true,
+            },
+          });
+
+          return usersIds.map((userId) => {
+            return subscribers.filter((sub) => {
+              return sub.userSubscribedTo.find(({ authorId }) => authorId === userId);
+            });
+          });
+        },
+      );
+
+      const postsLoader = new DataLoader<string, PostType[]>(
+        async (usersIds: readonly string[]) => {
+          const posts = await prisma.post.findMany({
+            where: {
+              authorId: {
+                in: [...usersIds],
+              },
+            },
+          });
+
+          return usersIds.map((userId) => {
+            return posts.filter((post) => post.authorId === userId) || [];
+          });
+        },
+      );
+
+      const profileLoader = new DataLoader<string, ProfileType | null>(
+        async (usersIds: readonly string[]) => {
+          const profiles = await prisma.profile.findMany({
+            where: {
+              userId: {
+                in: [...usersIds],
+              },
+            },
+          });
+
+          return usersIds.map((userId) => {
+            return profiles.find((profile) => profile.userId === userId) || null;
+          });
+        },
+      );
+
+      const memberTypeLoader = new DataLoader<string, MemberType>(
+        async (memberTypeIds: readonly string[]) => {
+          const memberTypes = await prisma.memberType.findMany({
+            where: {
+              id: {
+                in: [...memberTypeIds],
+              },
+            },
+          });
+
+          return memberTypeIds.map((memberTypeId) => {
+            return (
+              memberTypes.find((type) => type.id === memberTypeId) ||
+              Error('member type not found')
+            );
+          });
+        },
+      );
+
       return graphql({
         schema: schema,
         source: req.body.query,
         variableValues: req.body.variables,
         contextValue: {
           prisma,
+          dataLoader: {
+            userSubscribedTo: userSubscribedToLoader,
+            subscribedToUser: subscribedToUserLoader,
+            posts: postsLoader,
+            profile: profileLoader,
+            memberType: memberTypeLoader,
+          },
         },
       });
     },
